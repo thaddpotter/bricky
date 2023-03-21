@@ -1,7 +1,10 @@
 #Import
 import numpy as np
+from numpy.random import Generator,PCG64
 import random
 from sys import exit
+
+rng = Generator(PCG64())
 
 #Notes:
 #
@@ -18,9 +21,9 @@ from sys import exit
 #Makes a random word of length sz_deck, with n_cards set to 1
 def gen_hands(n_cards,sz_deck):
     hand = 0
+    inds = rng.choice(sz_deck,size=n_cards,replace=False,shuffle=False)
     for i in range(n_cards):
-        bit = random.randint(0, sz_deck+1)
-        hand |= 1 << bit
+        hand |= 1 << inds[i]
     return hand
 
 #Makes masks for bricks
@@ -91,6 +94,10 @@ def test_brick(hand, mask1, mask2, mask3, mask32):
 
     return a
 
+def check_error(arr, n_iter):
+    counts = arr.astype(np.float64)
+    error = np.sqrt( (n_iter - counts) * (counts**2 / n_iter + counts) / n_iter)
+    return error/n_iter
 
 #Main Body
 #---------------------------------------------
@@ -126,10 +133,12 @@ for ii in range(n_iter+1):
     if a.any() > 0:
         brick_arr[4] += 1
 
-out_arr = brick_arr.astype('float64') / n_iter
+out_arr = 100 * brick_arr.astype('float64') / n_iter
+error = 100 * check_error(brick_arr,n_iter)
 
 #Output results
 print(brick_arr)
+print(error)
 print('Brick Rate from Singles: ' + str(out_arr[0]))
 print('Brick Rate from Doubles: ' + str(out_arr[1]))
 print('Brick Rate from Triples: ' + str(out_arr[2]))
