@@ -4,6 +4,7 @@ from sys import exit
 import numpy as np
 from make_deck import gen_masks
 from numpy.random import PCG64, Generator
+import time
 
 rng = Generator(PCG64())
 
@@ -79,6 +80,8 @@ if (mask1 + mask2 + mask3 + mask32) > (1 << (sz_deck-1)):
     exit()
 
 # Do sims
+start = time.perf_counter()
+
 brick_arr = np.zeros(5)
 for ii in range(n_iter+1):
 
@@ -93,6 +96,9 @@ for ii in range(n_iter+1):
 
 out_arr = 100 * brick_arr.astype('float64') / n_iter
 error = 100 * check_error(brick_arr, n_iter)
+
+end = time.perf_counter()
+print("Elapsed Time: {}s".format((end - start)))
 
 # Output results
 print('Brick Rate from Singles: ' + str(out_arr[0]))
